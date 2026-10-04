@@ -1,0 +1,1011 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#2563eb">
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<title>wellness.com</title>
+<style>
+:root{--p:#2563eb;--p2:#1d4ed8;--navy:#123047;--bg:#f5f8fa;--card:#fff;--text:#17212b;--muted:#667085;--line:#dbe3e8;--ok:#15803d;--warn:#b45309;--danger:#b42318}
+*{box-sizing:border-box}html{background:var(--bg)}body{margin:0;background:linear-gradient(180deg,#eef6f6 0,#f7f9fb 180px);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
+header{background:linear-gradient(135deg,var(--navy) 0%,var(--p2) 55%,var(--p) 100%);color:#fff;padding:20px 16px 18px;position:sticky;top:0;z-index:5;box-shadow:0 4px 16px #12304730}h1{font-size:22px;margin:0 0 5px}.sub{opacity:.86;font-size:13px}
+nav{display:flex;gap:8px;padding:10px 12px;background:#ffffffee;backdrop-filter:blur(10px);position:sticky;top:80px;z-index:4;border-bottom:1px solid var(--line);overflow:auto;box-shadow:0 2px 8px #1230470b}nav button{border:1px solid #dce5e8;background:#f2f6f7;color:#334155;border-radius:22px;padding:9px 14px;white-space:nowrap;font-weight:700;transition:.15s}nav button.active{background:var(--p);border-color:var(--p);color:#fff;box-shadow:0 3px 8px #2563eb33}
+main{max-width:980px;margin:auto;padding:16px}.view{display:none}.view.active{display:block}.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.stat{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:13px;box-shadow:0 3px 10px #1230470b;position:relative;overflow:hidden}.stat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--p)}.stat b{font-size:19px;display:block;color:var(--navy)}.stat span{font-size:12px;color:var(--muted)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:17px;padding:15px;margin:11px 0;box-shadow:0 4px 14px #1230470a}.card h2,.card h3{color:var(--navy);margin-top:0}.row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+input,select{width:100%;padding:11px 12px;border:1px solid #cfd9df;border-radius:10px;background:#fff;color:var(--text);font:inherit;outline:none}input:focus,select:focus{border-color:var(--p);box-shadow:0 0 0 3px #2563eb18}label{font-size:12px;color:var(--muted);display:block;margin:8px 0 5px}.btn{border:0;border-radius:10px;padding:10px 13px;font-weight:750;font:inherit;cursor:pointer}.primary{background:var(--p);color:#fff}.secondary{background:#edf3f4;color:#29404a}.danger{background:#fee4e2;color:#a32018}.admin{background:var(--navy);color:#fff}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.name{font-weight:750}.meta{font-size:12px;color:var(--muted);margin-top:2px}.pill{font-size:11px;padding:4px 9px;border-radius:20px;background:#e9f8f3;color:#12623f;font-weight:700}.att{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-top:10px}.day{border:1px solid var(--line);border-radius:9px;padding:7px 3px;text-align:center;background:#fafcfc;cursor:pointer;font-size:11px}.day strong{display:block;font-size:14px}.day.full{background:#dcfce7;border-color:#86efac}.day.half{background:#fef3c7;border-color:#fcd34d}.day.off{background:#f1f5f9;color:#94a3b8}.weekbar{display:flex;gap:8px;align-items:end}.weekbar>div{flex:1}.amount{font-size:18px;font-weight:800}.right{text-align:right!important}.notice{background:#e9f8fa;border:1px solid #a9e4e9;padding:10px;border-radius:12px;font-size:13px;color:#24515a}.empty{padding:25px;text-align:center;color:var(--muted)}
+.locked{background:#fff0ef;border:1px solid #f6b8b3;color:#9f2118;padding:10px;border-radius:12px;font-size:13px}.small{font-size:12px;color:var(--muted)}.summary-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}.worker-photo{width:52px;height:52px;border-radius:50%;object-fit:cover;border:2px solid #b7e8df;background:#eaf7f5}.worker-head{display:flex;align-items:center;gap:10px}.worker-photo-lg{width:64px;height:64px;border-radius:50%;object-fit:cover;border:2px solid #7dd3c7}
+@media(max-width:600px){.cards{grid-template-columns:repeat(2,1fr)}.stat{padding:10px}.stat b{font-size:16px}.grid{grid-template-columns:1fr}.weekbar{flex-direction:column;align-items:stretch}.summary-grid{grid-template-columns:repeat(2,1fr)}main{padding:12px}}
+@media print{@page{size:A4 landscape;margin:10mm}body{background:white;font-size:11px}.no-print,header,nav{display:none!important}main{max-width:none;padding:0}.view{display:none!important}.print-report{display:block!important}.print-report h1{font-size:18px;margin:0 0 4px}.print-table{width:100%;border-collapse:collapse}.print-table th,.print-table td{border:1px solid #777;padding:5px 4px;text-align:center}.print-table th:first-child,.print-table td:nth-child(2){text-align:left}.print-table th{background:#eee}.sign{margin-top:24px;display:flex;justify-content:space-between}.sig{width:30%;border-top:1px solid #333;padding-top:5px}nav,.no-print,button{display:none!important}.card{box-shadow:none}}
+.print-report{display:none}
+</style>
+
+<style id="login-style">
+  #loginScreen{position:fixed;inset:0;z-index:9999;overflow:auto;background:linear-gradient(135deg,#eef8ff 0%,#ffffff 48%,#eaf8ef 100%);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+  .login-wrap{min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr;max-width:1250px;margin:auto}
+  .login-brand{padding:48px 7vw 40px 6vw;display:flex;flex-direction:column;justify-content:center;background:linear-gradient(145deg,#eaf6ff,#fff 55%,#effbf1)}
+  .brand-logo{display:flex;align-items:center;gap:14px;margin-bottom:24px}
+  .brand-mark{width:70px;height:70px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#0878df,#20a63a);color:#fff;font-size:38px;font-weight:900;box-shadow:0 8px 22px #0b72c733}
+  .brand-title{font-size:34px;line-height:1;font-weight:900;color:#17458e}
+  .brand-title span{display:block;color:#16752d;font-size:23px;margin-top:7px;letter-spacing:.3px}
+  .tagline{color:#1950a0;font-weight:700;font-size:16px;margin:6px 0 35px}
+  .brand-photo{width:100%;max-width:590px;border-radius:24px;box-shadow:0 12px 35px #0b4d6b20;background:linear-gradient(135deg,#dff2ff,#fff)}
+  .feature-list{display:grid;gap:18px;margin-top:30px;max-width:580px}
+  .feature{display:flex;gap:14px;align-items:center}
+  .feature-icon{width:46px;height:46px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:23px;background:#1684df}.feature:nth-child(2) .feature-icon{background:#20b84b}.feature:nth-child(3) .feature-icon{background:#f0a400}.feature:nth-child(4) .feature-icon{background:#7a35d8}
+  .feature b{display:block;color:#173d75}.feature span{font-size:13px;color:#5d6b7c}
+  .login-side{display:flex;align-items:center;justify-content:center;padding:30px}
+  .login-card{width:min(470px,100%);background:#fff;border-radius:26px;padding:34px 30px;box-shadow:0 18px 55px #16416b22;border:1px solid #dce9f3}
+  .login-card .mini-logo{display:flex;justify-content:center;margin-bottom:12px}
+  .mini-mark{width:74px;height:74px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(135deg,#0878df,#20a63a);color:white;font-size:40px;font-weight:900}
+  .login-card h2{text-align:center;color:#17458e;font-size:31px;margin:6px 0}
+  .login-card .welcome{text-align:center;color:#667085;margin:0 0 24px}
+  .login-field{position:relative;margin:13px 0}
+  .login-field .li{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:21px;color:#2d5b91}
+  .login-field input{padding:15px 45px 15px 45px;border:1px solid #cbdbea;border-radius:13px;outline:none}
+  .login-field input:focus{border-color:#1684df;box-shadow:0 0 0 3px #1684df18}
+  .eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);border:0;background:none;font-size:20px;color:#60738c;cursor:pointer}
+  .login-row{display:flex;justify-content:space-between;align-items:center;margin:12px 0 20px;font-size:14px}
+  .remember{display:flex;align-items:center;gap:8px;color:#315071}.remember input{width:auto}
+  .forgot{border:0;background:none;color:#086bd4;font-weight:700;cursor:pointer}
+  .login-btn{width:100%;padding:15px;border:0;border-radius:13px;color:#fff;font-size:18px;font-weight:800;background:linear-gradient(90deg,#0d83e8,#1769e0);cursor:pointer;box-shadow:0 8px 18px #0d75df2b}
+  .face-btn{width:100%;padding:13px;border:1px solid #2b83e0;border-radius:13px;background:#fff;color:#0c67ce;font-size:16px;font-weight:800;cursor:pointer;margin-top:14px}
+  .or{display:flex;align-items:center;gap:12px;color:#7a8795;margin:18px 0}.or:before,.or:after{content:"";height:1px;background:#dfe6ee;flex:1}
+  .secure{text-align:center;color:#778597;font-size:12px;margin-top:18px}
+  .login-error{display:none;background:#fff1f2;border:1px solid #fecdd3;color:#be123c;border-radius:10px;padding:10px;font-size:13px;margin-bottom:12px}
+  .login-help{font-size:12px;color:#7a8795;text-align:center;margin-top:12px}
+  @media(max-width:800px){.login-wrap{grid-template-columns:1fr}.login-brand{display:none}.login-side{min-height:100vh;padding:18px}.login-card{padding:28px 20px}}
+</style>
+
+<style id="report-style">
+.report-kpi{background:#fff;border:1px solid var(--line);border-radius:14px;padding:12px}
+.report-kpi b{font-size:20px;display:block}.report-kpi span{font-size:12px;color:var(--muted)}
+.report-scroll{overflow:auto}.report-table{width:100%;border-collapse:collapse;font-size:13px}
+.report-table th,.report-table td{padding:8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+.report-table th{background:#f8fafc}
+@media print{#reports .no-print{display:none!important}.report-table{font-size:10px}}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-brand">
+      <div class="brand-logo">
+        <div class="brand-mark">✚</div>
+        <div><div class="brand-title">MANDERA<span>WELLNESS CENTRE</span></div></div>
+      </div>
+      <div class="tagline">Better Health &nbsp;•&nbsp; Brighter Future</div>
+      <div class="brand-photo" style="height:260px;display:grid;place-items:center;font-size:78px;color:#1684df;">🏥</div>
+      <div class="feature-list">
+        <div class="feature"><div class="feature-icon">♥</div><div><b>Quality Healthcare</b><span>Professional and compassionate care for everyone.</span></div></div>
+        <div class="feature"><div class="feature-icon">♥</div><div><b>Wellness &amp; Prevention</b><span>Healthy today, stronger tomorrow.</span></div></div>
+        <div class="feature"><div class="feature-icon">●</div><div><b>Community Focus</b><span>A healthier community starts with you.</span></div></div>
+        <div class="feature"><div class="feature-icon">✓</div><div><b>Safe &amp; Trusted</b><span>Your health and privacy are our priority.</span></div></div>
+      </div>
+    </div>
+    <div class="login-side">
+      <div class="login-card">
+        <div class="mini-logo"><div class="mini-mark">✚</div></div>
+        <h2>MANDERA</h2>
+        <h2 style="font-size:21px;color:#16752d;margin-top:-2px">WELLNESS CENTRE</h2>
+        <p class="welcome">Welcome Back<br><span style="font-size:13px">Sign in with your username and password</span></p>
+        <div id="loginError" class="login-error"></div>
+        <form onsubmit="return doLogin(event)">
+          <div class="login-field">
+            <span class="li">👤</span>
+            <input id="loginUser" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="Username" required>
+          </div>
+          <div class="login-field">
+            <span class="li">🔒</span>
+            <input id="loginPass" type="password" autocomplete="current-password" placeholder="Password" required>
+            <button type="button" class="eye" onclick="toggleLoginPassword()" aria-label="Show password">◉</button>
+          </div>
+          <div class="login-row">
+            <label class="remember"><input id="rememberLogin" type="checkbox"> Remember Me</label>
+            <button type="button" class="forgot" onclick="forgotLogin()">Forgot Password?</button>
+          </div>
+          <button class="login-btn" type="submit">⇥ &nbsp; Login</button>
+        </form>
+        <div class="or">OR</div>
+        <button class="face-btn" type="button" onclick="createAccount()">＋ &nbsp; Create Account</button>
+        <div class="secure">🔒 Username + password authentication</div>
+        <div class="login-help">wellness.com system</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<header>
+  <div id="cloudStatus" style="position:fixed;right:12px;top:10px;z-index:9999;padding:6px 10px;border-radius:999px;background:rgba(255,255,255,.92);box-shadow:0 2px 8px rgba(0,0,0,.12);font-size:12px">Connecting to Firebase…</div>
+  <div class="worker-head">
+    <img class="worker-photo-lg" src="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjYwIiBmaWxsPSIjZTZmZmZiIi8+PGNpcmNsZSBjeD0iNjAiIGN5PSI0NSIgcj0iMjAiIGZpbGw9IiNmMmM3YTUiLz48cGF0aCBkPSJNMzggNDJjMy0xOSA0MS0yMyA0NCAwSDM4eiIgZmlsbD0iI2Y1YjQwMCIvPjxwYXRoIGQ9Ik0zMiA0Mmg1NnY4SDMyIiBmaWxsPSIjZDk5NDAwIi8+PHBhdGggZD0iTTQ1IDY2aDMwbDEyIDM1SDMzeiIgZmlsbD0iIzBmNzY2ZSIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iNDUiIHI9IjIuNSIgZmlsbD0iIzMzMyIvPjxjaXJjbGUgY3g9IjY3IiBjeT0iNDUiIHI9IjIuNSIgZmlsbD0iIzMzMyIvPjwvc3ZnPg==" alt="worker">
+    <div><h1>wellness.com</h1><div class="sub">Daily attendance • Weekly wages • Payment records</div></div>
+    <div style="margin-left:auto;text-align:right">
+      <div style="font-size:11px;opacity:.75">SIGNED IN</div>
+      <div id="whoami" style="font-size:13px;font-weight:700"></div>
+    </div>
+    <button class="btn secondary no-print" style="margin-left:10px" onclick="logout()">Logout</button>
+  </div>
+</header>
+
+<nav id="nav">
+  <button data-view="dashboard" class="active">Dashboard</button>
+  <button data-view="daily">Today</button>
+  <button data-view="attendance">Attendance</button>
+  <button data-view="workers">Workers</button>
+  <button data-view="payments">Payments</button>
+  <button data-view="expenses">Expenses</button>
+  <button data-view="materials">Materials</button>
+  <button data-view="reports">Reports</button>
+  <button data-view="settings">Settings</button>
+</nav>
+
+<main>
+<section id="dashboard" class="view active">
+<div class="cards">
+<div class="stat"><b id="sWorkers">0</b><span>Workers</span></div>
+<div class="stat"><b id="sPresent">0</b><span>Present this week</span></div>
+<div class="stat"><b id="sDue">KSh 0</b><span>Weekly due</span></div>
+<div class="stat"><b id="sMaterialAmount">KSh 0</b><span>Material amount</span></div>
+<div class="stat"><b id="sExpenseAmount">KSh 0</b><span>Expense amount</span></div>
+<div class="stat"><b id="sSiteCost">KSh 0</b><span>Total site cost</span></div>
+</div>
+<div class="card"><div class="row"><div><b>Current week</b><div class="meta" id="weekLabel"></div></div><button class="btn primary" onclick="show('attendance')">Mark attendance</button></div></div>
+<div class="card"><h3>Weekly payroll</h3><div id="payrollMini"></div></div>
+<div class="card"><div class="row"><div><h3 style="margin:0">Current Week — Expenses</h3><div class="meta">Item, quantity, amount per item and total</div></div><div class="amount" id="weekExpenseTotal">KSh 0</div></div><div id="weekExpenses"></div></div>
+<div class="card"><div class="row"><div><h3 style="margin:0">Current Week — Materials</h3><div class="meta">Sand / Kokoto, trips and rate per trip</div></div><div class="amount" id="weekMaterialTotal">KSh 0</div></div><div id="weekMaterials"></div></div>
+</section>
+
+<section id="daily" class="view">
+<div class="card"><div class="row"><div><h3 style="margin:0">Today's Attendance</h3><div class="meta" id="todayLabel"></div></div><div class="small">Attendance is open until manually locked by Admin.</div></div><div id="todayLock" style="margin-top:10px"></div></div>
+<div class="summary-grid" id="todayStats"></div>
+<div class="card"><h3>All Workers Today</h3><div id="todayList"></div></div>
+<div class="card no-print"><h3>Daily Amount</h3><div class="amount" id="todayAmount"></div><div class="small">Calculated from today's saved attendance and rates.</div></div>
+</section>
+
+<section id="attendance" class="view">
+<div class="card">
+  <div class="row"><div><h3 style="margin:0">Attendance Marking</h3><div class="meta">Select any date and mark all workers individually.</div></div></div>
+  <div class="grid">
+    <div><label>Attendance date</label><input id="attendanceDate" type="date" onchange="renderDateAttendance()"></div>
+    <div><label>Marking time</label><input id="attendanceTime" type="time" step="60"></div>
+  </div>
+  <div class="row" style="margin-top:8px"><button class="btn secondary" onclick="setAttendanceToday()">Today</button><button class="btn primary" onclick="markSelectedAttendance()">Save selected time</button></div>
+</div>
+<div class="card"><input id="searchDateAtt" placeholder="Search worker..." oninput="renderDateAttendance()"></div>
+<div class="card"><div class="row"><b id="attendanceDateLabel">Selected date</b><span class="meta" id="attendanceMarkedSummary"></span></div><div id="dateAttendanceList"></div></div>
+<div class="card"><div class="weekbar"><div><label>Week starting</label><input id="weekStart" type="date" onchange="render()"></div><button class="btn secondary" onclick="setThisWeek()">This week</button></div></div>
+<div class="card"><input id="searchAtt" placeholder="Search worker in weekly view..." oninput="renderAttendance()"></div>
+<div id="attendanceList"></div>
+<div class="notice">Weekly view: tap a day to cycle <b>Full</b> → <b>Half</b> → <b>Off</b>.</div>
+</section>
+
+<section id="workers" class="view">
+<div class="card"><div class="row"><h3 style="margin:0">Workers</h3><button class="btn primary" onclick="newWorker()">+ Add worker</button></div><input id="workerSearch" placeholder="Search worker by name, ID, phone or category..." oninput="renderWorkers()"></div>
+<div id="workerList"></div>
+</section>
+
+<section id="payments" class="view">
+<div class="card"><div class="row"><div><h3 style="margin:0">Payments</h3><div class="meta" id="paymentPeriodLabel">Selected payroll period</div></div><button class="btn primary" onclick="printWeekly()">🖨️ Print selected report</button></div><input id="paymentSearch" placeholder="Search worker..." oninput="renderPayments()"></div>
+<div class="summary-grid" id="paymentSummary"></div>
+<div id="paymentsList"></div>
+</section>
+
+<section id="expenses" class="view">
+  <div class="card"><h3 style="margin:0">Expenses</h3><p class="meta">Record site expenses for any date.</p></div>
+  <div class="card">
+    <div class="grid">
+      <div><label>Date</label><input id="expenseDate" type="date"></div>
+      <div><label>Item</label><input id="expenseItem" placeholder="Cement, transport, food..."></div>
+    </div>
+    <div class="grid">
+      <div><label>Quantity</label><input id="expenseQuantity" type="number" min="0.01" step="0.01" placeholder="1"></div>
+      <div><label>Amount per item</label><input id="expenseUnitAmount" type="number" min="0" step="0.01" placeholder="0"></div>
+    </div>
+    <label>Category</label><input id="expenseCategory" placeholder="Materials, transport, food...">
+    <label>Description</label><input id="expenseDescription" placeholder="Optional description">
+    <button class="btn primary" style="margin-top:10px" onclick="addExpense()">+ Add Expense</button>
+  </div>
+  <div class="card"><div class="row"><h3 style="margin:0">Recorded expenses</h3><span class="meta" id="expenseCount"></span></div><div id="expenseList" style="margin-top:12px"></div></div>
+</section>
+
+<section id="materials" class="view">
+  <div class="card"><h3 style="margin:0">Materials</h3><p class="meta">Record Sand or Kokoto deliveries by number of trips and rate per trip.</p></div>
+  <div class="card">
+    <div class="grid">
+      <div><label>Date</label><input id="materialDate" type="date"></div>
+      <div><label>Material</label><select id="materialType"><option>Sand</option><option>Kokoto</option></select></div>
+    </div>
+    <div class="grid">
+      <div><label>Trips</label><input id="materialTrips" type="number" min="1" step="1" placeholder="1"></div>
+      <div><label>Rate per trip</label><input id="materialRate" type="number" min="0" step="0.01" placeholder="0"></div>
+    </div>
+    <button class="btn primary" style="margin-top:10px" onclick="addMaterial()">+ Add Material</button>
+  </div>
+  <div class="card"><div class="row"><h3 style="margin:0">Recorded materials</h3><span class="meta" id="materialCount"></span></div><div id="materialList" style="margin-top:12px"></div></div>
+</section>
+
+<section id="reports" class="view">
+  <div class="card">
+    <div class="row">
+      <div><h3 style="margin:0">Smart Reports</h3><div class="meta">Attendance, payroll, expenses and balance.</div></div>
+      <div class="row no-print" style="gap:6px">
+        <button class="btn secondary" onclick="exportReportCSV()">⬇️ CSV / Excel</button>
+        <button class="btn secondary" onclick="downloadReportHTML()">⬇️ Report</button>
+        <button class="btn primary" onclick="printSmartReport()">🖨️ PDF / Print</button>
+      </div>
+    </div>
+  </div>
+  <div class="card no-print">
+    <div class="grid">
+      <div><label>Report period</label>
+        <select id="reportPeriod" onchange="renderReports()">
+          <option value="week">Weekly</option>
+          <option value="month">Monthly</option>
+          <option value="year">Yearly</option>
+        </select>
+      </div>
+      <div><label>Period</label><input id="reportDate" type="date" onchange="renderReports()"></div>
+    </div>
+  </div>
+  <div class="summary-grid" id="reportStats"></div>
+  <div class="card"><h3>Payroll &amp; Attendance Summary</h3><div id="reportTable"></div></div>
+  <div class="card"><h3>Expenses &amp; Financial Balance</h3><div id="expenseArea"></div></div>
+</section>
+
+<section id="settings" class="view">
+<div class="card"><h3>Settings</h3>
+<label>Currency</label><input id="currency" value="KSh" onchange="saveSettings()">
+<label>Working days</label><input id="workDays" value="Mon,Tue,Wed,Thu,Fri,Sat" onchange="saveSettings()">
+<div class="locked" style="margin-top:12px"><b>Admin protection:</b> Only the Admin PIN can change worker rates, worker list, attendance after a day is locked, or payment status.</div>
+<label>Admin PIN</label><input id="adminPin" type="password" inputmode="numeric" placeholder="Set admin PIN" onchange="setAdminPin()">
+<button class="btn secondary no-print" style="margin-top:8px" onclick="changeAdminPassword()">🔐 Change Administrator Password</button>
+<button class="btn danger no-print" style="margin-top:8px" onclick="logout()">↪ Logout</button>
+<button class="btn secondary" onclick="exportData()">Export backup</button>
+<button class="btn danger" onclick="resetAll()">Reset attendance & payment history</button>
+
+<hr style="border:0;border-top:1px solid var(--line);margin:18px 0">
+<h3>Attendance Settings</h3>
+<label>Default manual marking time</label>
+<input id="attendanceDefaultTime" type="time" onchange="saveAttendanceTime()">
+
+<h3>Data &amp; Security</h3>
+<div class="grid">
+  <button class="btn secondary" onclick="exportData()">⬇️ Backup data</button>
+  <button class="btn secondary" onclick="document.getElementById('importBackup').click()">⬆️ Restore backup</button>
+</div>
+<input id="importBackup" type="file" accept="application/json" style="display:none" onchange="importData(event)">
+<h3>Admin Activity Log</h3><div id="activityLog"></div>
+<h3>Admin Members</h3>
+<p class="meta">Additional users who can log in with their own username and password.</p>
+<div class="grid">
+  <div><label>Username</label><input id="newAdminUser" type="text" autocapitalize="none" spellcheck="false" placeholder="e.g. manager1"></div>
+  <div><label>Password</label><input id="newAdminPass" type="password" placeholder="Minimum 8 characters"></div>
+</div>
+<button class="btn primary" style="margin-top:8px" onclick="addAdminMember()">+ Add Admin Member</button>
+<div id="adminMembersList" style="margin-top:10px"></div>
+</div>
+</section>
+
+<section id="printReport" class="print-report"></section>
+</main>
+
+<script id="login-script">
+/* =========================================================
+   USERNAME + PASSWORD AUTHENTICATION
+   Firebase Auth works with email format, so usernames are
+   translated to <username>@gorofa.local internally.
+   If the user types something with "@", it is treated as a
+   real email address and passed through (legacy accounts).
+   ========================================================= */
+const AUTH_SESSION_KEY='gorofa_auth_session_v3';
+const AUTH_REMEMBER_KEY='gorofa_auth_remember_v3';
+const AUTH_SESSION_MS=30*60*1000;
+const USERNAME_DOMAIN='@gorofa.local';
+let authTimer=null;
+let authBusy=false;
+
+function usernameToEmail(u){
+  u=String(u||'').trim().toLowerCase();
+  if(!u)return '';
+  if(u.indexOf('@')!==-1)return u;
+  return u+USERNAME_DOMAIN;
+}
+function emailToUsername(e){
+  e=String(e||'').toLowerCase();
+  const i=e.indexOf(USERNAME_DOMAIN);
+  return i===-1?e:e.slice(0,i);
+}
+function validUsername(u){
+  return /^[a-z0-9._-]{3,30}$/i.test(String(u||'').trim());
+}
+
+function authSettings(){db.settings=db.settings||{};db.settings.auth=db.settings.auth||{};return db.settings.auth;}
+function b64(b){return btoa(String.fromCharCode(...new Uint8Array(b)))}
+function unb64(s){return Uint8Array.from(atob(s),c=>c.charCodeAt(0))}
+function randomBytes(n){return crypto.getRandomValues(new Uint8Array(n))}
+async function hashPassword(p,s){
+  const enc=new TextEncoder();
+  const key=await crypto.subtle.importKey('raw',enc.encode(p),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:s,iterations:150000,hash:'SHA-256'},key,256);
+  return b64(bits);
+}
+async function verifyPassword(p,stored,salt){
+  if(!stored||!salt)return false;
+  return (await hashPassword(p,unb64(salt)))===stored;
+}
+function sessionObj(){try{return JSON.parse(sessionStorage.getItem(AUTH_SESSION_KEY)||'null')}catch(e){return null}}
+function rememberObj(){try{return JSON.parse(localStorage.getItem(AUTH_REMEMBER_KEY)||'null')}catch(e){return null}}
+function setSession(remember,username){
+  const obj={token:b64(randomBytes(32)),username:username||null,expires:Date.now()+AUTH_SESSION_MS};
+  if(remember)localStorage.setItem(AUTH_REMEMBER_KEY,JSON.stringify(obj));
+  else sessionStorage.setItem(AUTH_SESSION_KEY,JSON.stringify(obj));
+  resetAuthTimer();
+}
+function clearSessions(){sessionStorage.removeItem(AUTH_SESSION_KEY);localStorage.removeItem(AUTH_REMEMBER_KEY)}
+function currentSession(){
+  const s=sessionObj(); if(s&&s.expires>Date.now())return s;
+  if(s)sessionStorage.removeItem(AUTH_SESSION_KEY);
+  const r=rememberObj(); if(r&&r.expires>Date.now())return r;
+  if(r)localStorage.removeItem(AUTH_REMEMBER_KEY);
+  return null;
+}
+function touchSession(){
+  const s=currentSession(); if(!s)return false;
+  s.expires=Date.now()+AUTH_SESSION_MS;
+  if(sessionObj())sessionStorage.setItem(AUTH_SESSION_KEY,JSON.stringify(s));
+  else if(rememberObj())localStorage.setItem(AUTH_REMEMBER_KEY,JSON.stringify(s));
+  resetAuthTimer(); return true;
+}
+function resetAuthTimer(){clearTimeout(authTimer);const s=currentSession();if(!s)return;authTimer=setTimeout(()=>{logout(true)},Math.max(1000,s.expires-Date.now()));}
+function isLoggedIn(){return !!currentSession()}
+function showApp(){const el=document.getElementById('loginScreen');if(el)el.style.display='none';resetAuthTimer();}
+function showLogin(){
+  const el=document.getElementById('loginScreen'); if(el)el.style.display='block';
+  const u=document.getElementById('loginUser'); const p=document.getElementById('loginPass');
+  if(u)u.value='';
+  if(p)p.value='';
+  clearLoginError();
+}
+function loginError(msg){const el=document.getElementById('loginError');if(el){el.textContent=msg;el.style.display='block'}}
+function clearLoginError(){const el=document.getElementById('loginError');if(el){el.textContent='';el.style.display='none'}}
+function setLoginMode(setup){
+  const title=document.querySelector('.login-card h2');
+  const welcome=document.querySelector('.login-card .welcome');
+  const btn=document.querySelector('.login-btn');
+  const forgot=document.querySelector('.forgot');
+  const face=document.querySelector('.face-btn');
+  const remember=document.querySelector('.remember');
+  const user=document.getElementById('loginUser');
+  const pass=document.getElementById('loginPass');
+  if(setup){
+    if(title)title.textContent='CREATE ACCOUNT';
+    if(welcome)welcome.innerHTML='Create your account<br><span style="font-size:13px">Choose a username and password</span>';
+    if(btn)btn.innerHTML='✓ &nbsp; Create Account';
+    if(forgot)forgot.style.display='none';
+    if(face)face.style.display='none';
+    if(remember)remember.style.display='none';
+    if(user)user.placeholder='Choose a username';
+    if(pass){pass.autocomplete='new-password';pass.placeholder='Password (minimum 6 characters)'}
+  }else{
+    if(title)title.textContent='MANDERA';
+    if(welcome)welcome.innerHTML='Welcome Back<br><span style="font-size:13px">Sign in with your username and password</span>';
+    if(btn)btn.innerHTML='⇥ &nbsp; Login';
+    if(forgot)forgot.style.display='';
+    if(face)face.style.display='';
+    if(remember)remember.style.display='flex';
+    if(user)user.placeholder='Username';
+    if(pass){pass.autocomplete='current-password';pass.placeholder='Password'}
+  }
+}
+function updateWhoAmI(){
+  const el=document.getElementById('whoami');
+  if(!el)return;
+  const u=window.gorofaFirebase?.auth?.currentUser;
+  el.textContent=u?emailToUsername(u.email||u.uid):'';
+}
+
+async function doLogin(e){
+  e.preventDefault();
+  if(authBusy)return false;
+  authBusy=true; clearLoginError();
+  try{
+    const raw=document.getElementById('loginUser').value.trim();
+    const password=document.getElementById('loginPass').value;
+    if(!raw){loginError('Enter your username.');return false}
+    if(!raw.includes('@') && !validUsername(raw)){loginError('Username must be 3–30 characters (letters, numbers, . _ -).');return false}
+    if(password.length<6){loginError('Password must contain at least 6 characters.');return false}
+    if(!window.gorofaFirebase?.auth){loginError('Firebase is not ready. Please wait and try again.');return false}
+    const email=usernameToEmail(raw);
+    const result=await window.gorofaFirebase.auth.signInWithEmailAndPassword(email,password);
+    const remember=document.getElementById('rememberLogin')?.checked;
+    setSession(remember,emailToUsername(result.user.email));
+    setLoginMode(false); showApp(); updateWhoAmI();
+    await startCloudSyncForUser(result.user);
+    return false;
+  }catch(err){console.error(err);loginError(firebaseFriendlyError(err));return false;}
+  finally{authBusy=false}
+}
+function toggleLoginPassword(){const p=document.getElementById('loginPass');if(!p)return;p.type=p.type==='password'?'text':'password';}
+async function createAccount(){
+  if(authBusy)return; authBusy=true;
+  try{
+    const username=(prompt('Choose a username (3–30 letters, numbers, . _ -):')||'').trim().toLowerCase();
+    if(!username){return}
+    if(!validUsername(username)){alert('Invalid username. Use 3–30 letters, numbers, dots, underscores or dashes.');return}
+    const password=prompt('Create password (minimum 6 characters):')||'';
+    if(password.length<6){alert('Password must contain at least 6 characters.');return}
+    const confirmPass=prompt('Confirm password:')||'';
+    if(password!==confirmPass){alert('Passwords do not match.');return}
+    if(!window.gorofaFirebase?.auth){alert('Firebase is not ready.');return}
+    const result=await window.gorofaFirebase.auth.createUserWithEmailAndPassword(usernameToEmail(username),password);
+    const remember=document.getElementById('rememberLogin')?.checked;
+    setSession(remember,username);
+    setLoginMode(false); showApp(); updateWhoAmI();
+    await startCloudSyncForUser(result.user);
+    alert('Account created. Welcome, '+username+'!');
+  }catch(err){
+    console.error(err);
+    if(err && err.code==='auth/email-already-in-use'){alert('That username is already taken. Please choose another.');}
+    else{alert(firebaseFriendlyError(err));}
+  }
+  finally{authBusy=false}
+}
+async function forgotLogin(){
+  const raw=(document.getElementById('loginUser')?.value||'').trim();
+  if(!raw){alert('Enter your username first.');return}
+  if(!raw.includes('@')){
+    alert('This system uses usernames, not email addresses, so automatic password reset is not available. Please ask your administrator to reset your password.');
+    return;
+  }
+  try{
+    if(!window.gorofaFirebase?.auth){alert('Firebase is not ready.');return}
+    await window.gorofaFirebase.auth.sendPasswordResetEmail(raw.toLowerCase());
+    alert('Password reset instructions sent to '+raw+'.');
+  }catch(err){alert(firebaseFriendlyError(err));}
+}
+async function changeAdminPassword(){
+  if(!isLoggedIn()){showLogin();return}
+  const current=prompt('Enter current administrator password:')||'';
+  if(!(await verifyPassword(current,authSettings().passwordHash,authSettings().salt))){alert('Current password is incorrect.');return}
+  const next=prompt('Enter new password (minimum 8 characters):')||'';
+  if(next.length<8){alert('Password must contain at least 8 characters.');return}
+  const confirmNext=prompt('Confirm new password:')||'';
+  if(next!==confirmNext){alert('Passwords do not match.');return}
+  const salt=randomBytes(16);
+  authSettings().salt=b64(salt);
+  authSettings().passwordHash=await hashPassword(next,salt);
+  save();clearSessions();
+  alert('Password changed. Please log in again.');
+  showLogin();setLoginMode(false);
+}
+async function logout(expired){
+  try{if(window.gorofaFirebase?.auth)await window.gorofaFirebase.auth.signOut()}catch(e){console.error(e)}
+  if(cloudUnsubscribe){try{cloudUnsubscribe()}catch(e){} cloudUnsubscribe=null}
+  cloudReady=false;
+  clearSessions();clearTimeout(authTimer);showLogin();setLoginMode(false);
+  updateWhoAmI();
+  if(expired)loginError('Your session expired. Please log in again.');
+}
+function installAuthActivity(){['click','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,()=>{if(isLoggedIn())touchSession()},{passive:true}));}
+async function initAuth(){
+  installAuthActivity();
+  const user=window.gorofaFirebase?.auth?.currentUser;
+  if(user){
+    setSession(true,emailToUsername(user.email));
+    setLoginMode(false); showApp(); updateWhoAmI();
+    await startCloudSyncForUser(user);
+  }else{
+    clearSessions(); setLoginMode(false); showLogin();
+  }
+}
+</script>
+
+<script>
+/* ===== FIREBASE CLOUD SYNC ===== */
+if(!window.firebase){document.getElementById('cloudStatus').textContent='⚠️ Firebase SDK not loaded';throw new Error('Firebase missing');}
+let cloudReady=false,cloudSaving=false,cloudUnsubscribe=null,cloudApplying=false;
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyDVBZgQp2u5Awb4O6K1SM9gB6Y-0NpB0GA",
+  authDomain:"gorafa-payment.firebaseapp.com",
+  projectId:"gorafa-payment",
+  storageBucket:"gorafa-payment.firebasestorage.app",
+  messagingSenderId:"646663554381",
+  appId:"1:646663554381:web:c01ad62ad06a10d71b6304"
+};
+function cloudClone(v){return JSON.parse(JSON.stringify(v));}
+function cloudSafeData(src){
+  const x=cloudClone(src||{}); x.settings=x.settings||{};
+  delete x.settings.auth; delete x.settings.adminMembers; delete x.settings.adminPin;
+  x._cloudUpdatedAt=Date.now(); return x;
+}
+function mergeCloudData(remote){
+  if(!remote||typeof remote!=='object')return;
+  const local=db.settings||{};
+  const auth=local.auth, members=local.adminMembers, pin=local.adminPin;
+  db=remote; db.settings=db.settings||{};
+  if(auth)db.settings.auth=auth;
+  if(members)db.settings.adminMembers=members;
+  if(pin)db.settings.adminPin=pin;
+  delete db._cloudUpdatedAt;
+  db.activity=Array.isArray(db.activity)?db.activity:[];
+  db.attendance=db.attendance||{}; db.attendanceMeta=db.attendanceMeta||{};
+  db.payments=db.payments||{}; db.expenses=Array.isArray(db.expenses)?db.expenses:[];
+  db.materials=Array.isArray(db.materials)?db.materials:[]; db.locks=db.locks||{};
+  if(typeof render==='function')render();
+}
+function updateCloudStatus(t){const el=document.getElementById('cloudStatus');if(el)el.textContent=t;}
+function firebaseFriendlyError(err){
+  const code=err?.code||'';
+  const map={
+    'auth/invalid-email':'That username is not valid.',
+    'auth/user-not-found':'No account exists with that username.',
+    'auth/wrong-password':'Incorrect password.',
+    'auth/invalid-credential':'Incorrect username or password.',
+    'auth/email-already-in-use':'That username is already taken.',
+    'auth/weak-password':'Password must be at least 6 characters.',
+    'auth/admin-restricted-operation':'Username/password sign-in is not enabled.',
+    'auth/too-many-requests':'Too many attempts. Try again later.',
+    'auth/network-request-failed':'Network error. Check your internet connection.',
+    'permission-denied':'Firestore permission denied. Check your Firestore Rules.',
+    'failed-precondition':'Firestore is not enabled.'
+  };
+  return map[code]||err?.message||'Something went wrong.';
+}
+async function initFirebaseCloud(){
+  try{
+    if(!window.firebase)throw new Error('Firebase SDK not loaded.');
+    const app=window.firebase.apps.length?window.firebase.app():window.firebase.initializeApp(FIREBASE_CONFIG);
+    const auth=window.firebase.auth(app);
+    const store=window.firebase.firestore(app);
+    try{await store.enablePersistence({synchronizeTabs:true});}
+    catch(e){console.warn('Persistence not enabled:',e);}
+    window.gorofaFirebase={app,auth,store,ref:null};
+    updateCloudStatus(auth.currentUser?'☁️ Firebase ready':'🔐 Sign in to connect Firebase');
+    auth.onAuthStateChanged(async user=>{
+      if(user){
+        setSession(true,emailToUsername(user.email));
+        setLoginMode(false); showApp(); updateWhoAmI();
+        await startCloudSyncForUser(user);
+      }else{
+        if(cloudUnsubscribe){try{cloudUnsubscribe()}catch(e){} cloudUnsubscribe=null}
+        cloudReady=false; updateCloudStatus('🔐 Sign in to connect Firebase');
+        updateWhoAmI();
+      }
+    });
+  }catch(err){
+    console.error(err);
+    updateCloudStatus('⚠️ Firebase failed • '+(err.code||err.message));
+  }
+}
+async function startCloudSyncForUser(user){
+  if(!user||!window.gorofaFirebase)return;
+  const ref=window.gorofaFirebase.store.collection('gorofa').doc('sharedData');
+  window.gorofaFirebase.ref=ref;
+  try{
+    const first=await ref.get();
+    if(first.exists){cloudApplying=true;mergeCloudData(first.data());cloudApplying=false;updateCloudStatus('☁️ Connected • Shared data loaded');}
+    else{await ref.set(cloudSafeData(db));updateCloudStatus('☁️ Connected • Initial upload');}
+    cloudReady=true;
+    if(cloudUnsubscribe)try{cloudUnsubscribe()}catch(e){}
+    cloudUnsubscribe=ref.onSnapshot({includeMetadataChanges:true},snap=>{
+      if(!snap.exists||cloudSaving||cloudApplying)return;
+      cloudApplying=true;
+      try{
+        mergeCloudData(snap.data());
+        if(snap.metadata.fromCache)updateCloudStatus('📴 Offline cache');
+        else if(snap.metadata.hasPendingWrites)updateCloudStatus('☁️ Saving…');
+        else updateCloudStatus('☁️ Live • All users see synced changes');
+      }finally{cloudApplying=false;}
+    },err=>{cloudReady=false;updateCloudStatus('⚠️ '+firebaseFriendlyError(err));});
+  }catch(err){
+    cloudReady=false; console.error(err);
+    updateCloudStatus('⚠️ Firebase failed • '+firebaseFriendlyError(err));
+  }
+}
+async function pushCloud(){
+  if(cloudApplying||!window.gorofaFirebase?.ref)return;
+  const u=window.gorofaFirebase?.auth?.currentUser;
+  if(!u){updateCloudStatus('🔐 Sign in to save');return;}
+  if(!cloudReady){updateCloudStatus('⏳ Connecting…');return;}
+  try{
+    cloudSaving=true;
+    await window.gorofaFirebase.ref.set(cloudSafeData(db),{merge:true});
+    updateCloudStatus('☁️ Saved • All users see the change');
+  }catch(err){console.error(err);updateCloudStatus('⚠️ Save failed • '+firebaseFriendlyError(err));}
+  finally{cloudSaving=false;}
+}
+
+/* ===== DATA ===== */
+const initialWorkers=[{"id":"22210341","name":"CRIUS MWAVU MBWIA","phone":"0722874264","category":"Engineer","fullRate":2300,"halfRate":1800},{"id":"36389821","name":"daniel anjila","phone":"759099998","category":"operater","fullRate":2000,"halfRate":1500},{"id":"41503347","name":"ISMAIL NJERERE","phone":"118469954","category":"Skilled","fullRate":1500,"halfRate":1200},{"id":"27969887","name":"mumo mwangi","phone":"0724382956","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"28704201","name":"wilstone omondi","phone":"718448916","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"26850234","name":"antony wanyama","phone":"715883818","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"35278708","name":"chris wanjala","phone":"740289297","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"40838648","name":"ANDERSON KITSAO","phone":"768486964","category":"Skilled","fullRate":1900,"halfRate":1200},{"id":"13283955","name":"ISAACK SIADA","phone":"727954992","category":"Skilled","fullRate":1700,"halfRate":1400},{"id":"23764458","name":"issack muimi","phone":"718501166","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"32771706","name":"hesbon mwangi","phone":"725008770","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"22667905","name":"JASPER ONYAI","phone":"797411687","category":"Skilled","fullRate":1700,"halfRate":1500},{"id":"40898648","name":"dan mwangi","phone":"722874264","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"28045287","name":"james chikuu","phone":"715110420","category":"Skilled","fullRate":1700,"halfRate":1200},{"id":"31786717","name":"RAMA SALIM","phone":"0113262957","category":"Skilled","fullRate":1900,"halfRate":1200},{"id":"32663487","name":"abdullah muhamed","phone":"710337385","category":"Skilled","fullRate":1700,"halfRate":1400},{"id":"398754321","name":"DAVID PETER","phone":"745633179","category":"Skilled","fullRate":1500,"halfRate":700},{"id":"39064814","name":"JOSHUA MWAMERI","phone":"723647524","category":"Skilled","fullRate":1500,"halfRate":700},{"id":"26901434","name":"evans dirango","phone":"714034234","category":"Skilled","fullRate":2000,"halfRate":1500},{"id":"24936907","name":"Elijah Mulawasi","phone":"723304458","category":"skilled","fullRate":1700,"halfRate":1200},{"id":"31255950","name":"HASSAN NOOR","phone":"725265450","category":"UNSKILLED","fullRate":1100,"halfRate":1000},{"id":"28699025","name":"albert mwangi","phone":"711964654","category":"UNSKILLED","fullRate":1500,"halfRate":1000},{"id":"25746053","name":"ALI SULEMAN IBRAHIM","phone":"723085351","category":"UNSKILLED","fullRate":1100,"halfRate":700},{"id":"31225579","name":"ANTONY MULIALE","phone":"769473923","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"130196252","name":"charles mutimi","phone":"728768087","category":"UNSKILLED","fullRate":1500,"halfRate":1000},{"id":"43414837","name":"josphel omollo","phone":"725475053","category":"UNSKILLED","fullRate":1100,"halfRate":700},{"id":"38734493","name":"wilfred otieno","phone":"769128887","category":"UNSKILLED","fullRate":1100,"halfRate":700},{"id":"37577415","name":"SAMUEL CHENGO","phone":"799010226","category":"UNSKILLED","fullRate":1100,"halfRate":700},{"id":"25876261","name":"baraka ali","phone":"0703245202","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"34741208","name":"MASUDI BUNGARE","phone":"745709652","category":"UNSKILLED","fullRate":1100,"halfRate":700},{"id":"28139533","name":"ABDIRIZAK ABDULLAH","phone":"0707098873","category":"UNSKILLED","fullRate":1500,"halfRate":700},{"id":"25764174","name":"denis kilonzo","phone":"0717748457","category":"UNSKILLED","fullRate":1100,"halfRate":700},{"id":"35669051","name":"ABDISAMAD HASSAN","phone":"721648392","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"42700250","name":"victor mutemi","phone":"141441550","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"31990582","name":"JOHNMAKAU","phone":"0722305046","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"42171518","name":"mohamed amin","phone":"788771986","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"31245179","name":"emmanuel murithi","phone":"798987143","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"30141952","name":"omar ali","phone":"118547165","category":"UNSKILLED","fullRate":1500,"halfRate":700},{"id":"22149564","name":"saddam mohamed","phone":"727440725","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"26250202","name":"hassan husein","phone":"727294781","category":"UNSKILLED","fullRate":1100,"halfRate":700},{"id":"40770256","name":"hashim mohamed","phone":"754845612","category":"UNSKILLED","fullRate":1000,"halfRate":700},{"id":"25746053","name":"ALI SULEMAN IBRAHIM","phone":"723085351","category":"CURING","fullRate":1600,"halfRate":700},{"id":"41776447","name":"shamsudin abdinasir","phone":"72686920","category":"superviser","fullRate":700,"halfRate":0}];
+const KEY='gorofa_pay_v1';
+let db=JSON.parse(localStorage.getItem(KEY)||'null')||{workers:initialWorkers,attendance:{},attendanceMeta:{},payments:{},expenses:[],materials:[],settings:{currency:'KSh',workDays:'Mon,Tue,Wed,Thu,Fri,Sat',adminPin:'1234',attendanceDefaultTime:'08:00',adminMembers:[]}};
+if(!Array.isArray(db.workers))db.workers=[];
+const existingIds=new Set(db.workers.map(w=>String(w.id)));
+initialWorkers.forEach(w=>{if(!existingIds.has(String(w.id)))db.workers.push({...w});});
+db.settings=db.settings||{};db.settings.currency=db.settings.currency||'KSh';db.settings.workDays=db.settings.workDays||'Mon,Tue,Wed,Thu,Fri,Sat';db.settings.attendanceDefaultTime=db.settings.attendanceDefaultTime||'08:00';db.settings.adminMembers=Array.isArray(db.settings.adminMembers)?db.settings.adminMembers:[];db.attendanceMeta=db.attendanceMeta||{};db.expenses=Array.isArray(db.expenses)?db.expenses:[];db.materials=Array.isArray(db.materials)?db.materials:[];db.locks=db.locks||{};db.activity=Array.isArray(db.activity)?db.activity:[];db.payments=db.payments||{};
+
+function save(){localStorage.setItem(KEY,JSON.stringify(db));if(!cloudApplying)pushCloud();}
+function cur(n){return (db.settings.currency||'KSh')+' '+Number(n||0).toLocaleString()}
+function monday(d){d=new Date(d);let x=(d.getDay()+6)%7;d.setDate(d.getDate()-x);d.setHours(0,0,0,0);return d}
+function iso(d){return new Date(d).toISOString().slice(0,10)}
+function setThisWeek(){const el=document.getElementById('weekStart');if(el)el.value=iso(monday(new Date()));render()}
+function week(){const el=document.getElementById('weekStart');return (el&&el.value)||iso(monday(new Date()))}
+function days(){let s=new Date(week()+'T00:00:00');return Array.from({length:7},(_,i)=>{let d=new Date(s);d.setDate(d.getDate()+i);return d})}
+function key(wid,date){return wid+'|'+date}
+function status(wid,date){return db.attendance[key(wid,date)]||'off'}
+function calc(w){return days().reduce((a,d)=>a+(status(w.id,iso(d))==='full'?+w.fullRate:status(w.id,iso(d))==='half'?+w.halfRate:0),0)}
+function present(w){return days().filter(d=>status(w.id,iso(d))!=='off').length}
+
+function renderDashboard(){
+  const d=days();
+  const wl=document.getElementById('weekLabel'); if(wl)wl.textContent=d[0].toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'})+' – '+d[6].toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'});
+  const sw=document.getElementById('sWorkers'); if(sw)sw.textContent=db.workers.length;
+  const sp=document.getElementById('sPresent'); if(sp)sp.textContent=db.workers.reduce((s,w)=>s+present(w),0);
+  const total=db.workers.reduce((s,w)=>s+calc(w),0);
+  const sd=document.getElementById('sDue'); if(sd)sd.textContent=cur(total);
+  const ex=db.expenses.filter(e=>inCurrentWeek(e.date));
+  const mat=db.materials.filter(m=>inCurrentWeek(m.date));
+  const exA=ex.reduce((a,e)=>a+expenseTotal(e),0), mtA=mat.reduce((a,m)=>a+materialTotal(m),0);
+  const sm=document.getElementById('sMaterialAmount'); if(sm)sm.textContent=cur(mtA);
+  const se=document.getElementById('sExpenseAmount'); if(se)se.textContent=cur(exA);
+  const sc=document.getElementById('sSiteCost'); if(sc)sc.textContent=cur(total+exA+mtA);
+  renderWeekCosts();
+  const pm=document.getElementById('payrollMini');
+  if(pm)pm.innerHTML=db.workers.map((w,i)=>{
+    const amt=calc(w), daysPresent=present(w), paid=!!db.payments[w.id+'|'+week()];
+    return `<div class="row" style="padding:9px 0;border-bottom:1px solid var(--line)">
+      <div class="worker-head"><img class="worker-photo" src="${AVATAR}" alt=""><div><b>${i+1}. ${esc(w.name)}</b><div class="meta">${esc(w.category)} • ${esc(w.id)} • ${daysPresent} day${daysPresent===1?'':'s'}</div></div></div>
+      <div class="right"><div class="amount">${cur(amt)}</div><span class="pill">${paid?'PAID':'DUE'}</span></div>
+    </div>`;
+  }).join('')||'<div class="empty">No workers registered.</div>';
+}
+
+const AVATAR='data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMjAgMTIwIj48cmVjdCB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgcng9IjYwIiBmaWxsPSIjZTZmZmZiIi8+PGNpcmNsZSBjeD0iNjAiIGN5PSI0NSIgcj0iMjAiIGZpbGw9IiNmMmM3YTUiLz48cGF0aCBkPSJNMzggNDJjMy0xOSA0MS0yMyA0NCAwSDM4eiIgZmlsbD0iI2Y1YjQwMCIvPjxwYXRoIGQ9Ik0zMiA0Mmg1NnY4SDMyIiBmaWxsPSIjZDk5NDAwIi8+PHBhdGggZD0iTTQ1IDY2aDMwbDEyIDM1SDMzeiIgZmlsbD0iIzBmNzY2ZSIvPjxjaXJjbGUgY3g9IjUzIiBjeT0iNDUiIHI9IjIuNSIgZmlsbD0iIzMzMyIvPjxjaXJjbGUgY3g9IjY3IiBjeT0iNDUiIHI9IjIuNSIgZmlsbD0iIzMzMyIvPjwvc3ZnPg==';
+
+function show(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  const el=document.getElementById(v); if(el)el.classList.add('active');
+  document.querySelectorAll('nav button').forEach(x=>x.classList.toggle('active',x.dataset.view===v));
+  render();
+}
+document.querySelectorAll('nav button').forEach(b=>b.onclick=()=>show(b.dataset.view));
+
+function cycle(wid,date){
+  if(db.locks[date]&&!adminOK())return;
+  let k=key(wid,date),v=status(wid,date);
+  db.attendance[k]=v==='off'?'full':v==='full'?'half':'off';
+  save();render();
+}
+function cutoffPassed(){return false}
+
+function renderAttendance(){
+  const q=(document.getElementById('searchAtt')?.value||'').toLowerCase();
+  const ds=days();
+  const list=db.workers.filter(w=>(w.name+' '+w.id+' '+w.category).toLowerCase().includes(q));
+  const el=document.getElementById('attendanceList'); if(!el)return;
+  el.innerHTML=list.map(w=>{
+    const cells=ds.map(d=>{
+      const date=iso(d),v=status(w.id,date),locked=!!db.locks[date];
+      const label=v==='full'?'FULL':v==='half'?'HALF':'OFF';
+      const onclick=locked?`adminEditAttendance('${esc(w.id)}','${date}')`:`cycle('${esc(w.id)}','${date}')`;
+      return `<button class="day ${v}" onclick="${onclick}"><strong>${d.getDate()}</strong>${label}</button>`;
+    }).join('');
+    return `<div class="card"><div class="row"><div><div class="name">${esc(w.name)}</div><div class="meta">${esc(w.category)} • ${esc(w.id)}</div></div><div class="amount">${cur(calc(w))}</div></div><div class="att">${cells}</div></div>`;
+  }).join('')||'<div class="empty">No workers found.</div>';
+}
+
+function renderWorkers(){
+  const q=(document.getElementById('workerSearch')?.value||'').toLowerCase();
+  const list=db.workers.filter(w=>(w.name+' '+w.id+' '+w.phone+' '+w.category).toLowerCase().includes(q));
+  const el=document.getElementById('workerList'); if(!el)return;
+  el.innerHTML=list.map(w=>{
+    const i=db.workers.indexOf(w);
+    return `<div class="card"><div class="row"><div class="worker-head"><img class="worker-photo" src="${AVATAR}" alt=""><div><div class="name">${esc(w.name)}</div><div class="meta">${esc(w.id)} • ${esc(w.phone)} • ${esc(w.category)}</div></div></div><div><button class="btn secondary" onclick="editWorker(${i})">Edit</button> <button class="btn danger" onclick="deleteWorker(${i})">Delete</button></div></div><div class="grid"><div><label>Full day</label><input type="number" value="${w.fullRate}" readonly onclick="if(adminOK()){this.readOnly=false}" onchange="if(!adminOK())return;db.workers[${i}].fullRate=+this.value;save();render()"></div><div><label>Half day</label><input type="number" value="${w.halfRate}" readonly onclick="if(adminOK()){this.readOnly=false}" onchange="if(!adminOK())return;db.workers[${i}].halfRate=+this.value;save();render()"></div></div></div>`;
+  }).join('')||'<div class="empty">No workers found.</div>';
+}
+function deleteWorker(i){if(!adminOK())return;const w=db.workers[i];if(!w)return;if(!confirm('Delete '+w.name+'?'))return;db.workers.splice(i,1);logActivity('Deleted worker: '+w.name);save();render()}
+function editWorker(i){if(!adminOK())return;const w=db.workers[i];const name=prompt('Worker name',w.name);if(name===null)return;w.name=name.trim();w.category=prompt('Category',w.category)||'';w.phone=prompt('Phone',w.phone)||'';save();render()}
+function newWorker(){if(!adminOK())return;const name=prompt('Worker name');if(!name)return;db.workers.push({id:prompt('ID (optional)')||('W'+Date.now()),name,phone:prompt('Phone (optional)')||'',category:prompt('Category (optional)')||'',fullRate:+prompt('Full-day rate','0')||0,halfRate:+prompt('Half-day rate','0')||0});save();render()}
+
+function paymentKey(id,p){return id+'|'+p.label}
+function getPayment(id,p){
+  const v=db.payments[paymentKey(id,p)]; if(!v)return {status:'due',paid:0};
+  if(typeof v==='boolean')return {status:v?'paid':'due',paid:0};
+  return {status:v.status||'due',paid:+v.paid||0,date:v.date,method:v.method||'Cash'};
+}
+
+function selectedPeriod(){
+  const type=document.getElementById('periodType')?.value||'week';
+  const raw=document.getElementById('periodDate')?.value||iso(new Date());
+  const dt=new Date(raw+'T00:00:00');
+  let start,end,label;
+  if(type==='year'){const y=+(document.getElementById('periodYear')?.value||dt.getFullYear());start=new Date(y,0,1);end=new Date(y+1,0,1);label='Year '+y}
+  else if(type==='month'){start=new Date(dt.getFullYear(),dt.getMonth(),1);end=new Date(dt.getFullYear(),dt.getMonth()+1,1);label=start.toLocaleDateString('en',{month:'long',year:'numeric'})}
+  else{start=monday(dt);end=new Date(start);end.setDate(end.getDate()+7);label=start.toLocaleDateString()+' – '+new Date(end-1).toLocaleDateString()}
+  const ds=[];for(let d=new Date(start);d<end;d.setDate(d.getDate()+1))ds.push(new Date(d));
+  return {type,start,end,days:ds,label};
+}
+function periodCalc(w,p){return p.days.reduce((a,d)=>a+(status(w.id,iso(d))==='full'?+w.fullRate:status(w.id,iso(d))==='half'?+w.halfRate:0),0)}
+function periodPresent(w,p){return p.days.filter(d=>status(w.id,iso(d))!=='off').length}
+
+function renderPayments(){
+  const p=selectedPeriod(), q=(document.getElementById('paymentSearch')?.value||'').toLowerCase();
+  const list=db.workers.filter(w=>(w.name+' '+w.id+' '+w.category).toLowerCase().includes(q));
+  let totals=list.reduce((a,w)=>{const due=periodCalc(w,p),pay=getPayment(w.id,p).paid;a.due+=due;a.paid+=pay;return a},{due:0,paid:0});
+  const ps=document.getElementById('paymentSummary');
+  if(ps)ps.innerHTML=`<div class="report-kpi"><b>${cur(totals.due)}</b><span>Total due</span></div><div class="report-kpi"><b>${cur(totals.paid)}</b><span>Paid</span></div><div class="report-kpi"><b>${cur(Math.max(0,totals.due-totals.paid))}</b><span>Outstanding</span></div>`;
+  const pl=document.getElementById('paymentsList');
+  if(pl)pl.innerHTML=list.map(w=>{
+    const amt=periodCalc(w,p),rec=getPayment(w.id,p),out=Math.max(0,amt-rec.paid),st=out<=0&&amt>0?'PAID':rec.paid>0?'PARTIAL':'DUE';
+    return `<div class="card"><div class="row"><div><div class="name">${esc(w.name)}</div><div class="meta">${periodPresent(w,p)} days • ${esc(p.label)}</div></div><div class="right"><div class="amount">${cur(amt)}</div><span class="pill">${st}</span></div></div><div class="grid" style="margin-top:9px"><div><label>Amount paid</label><input id="pay_${esc(w.id)}" type="number" min="0" max="${amt}" value="${rec.paid}"></div><div><label>Method</label><select id="method_${esc(w.id)}"><option ${rec.method==='Cash'?'selected':''}>Cash</option><option ${rec.method==='M-Pesa'?'selected':''}>M-Pesa</option><option ${rec.method==='Bank'?'selected':''}>Bank</option><option ${rec.method==='Other'?'selected':''}>Other</option></select></div></div><div style="margin-top:9px;display:flex;gap:6px;flex-wrap:wrap"><button class="btn primary" onclick="savePayment('${esc(w.id)}')">Save</button><button class="btn secondary" onclick="printReceipt('${esc(w.id)}')">🧾</button><span class="meta">Outstanding: ${cur(out)}</span></div></div>`;
+  }).join('')||'<div class="empty">No workers.</div>';
+  const lab=document.getElementById('paymentPeriodLabel');if(lab)lab.textContent=p.label;
+}
+function savePayment(id){
+  if(!adminOK())return;
+  const p=selectedPeriod(),w=db.workers.find(x=>x.id===id); if(!w)return;
+  const due=periodCalc(w,p),paid=Math.max(0,Math.min(due,+(document.getElementById('pay_'+id)?.value||0))),method=document.getElementById('method_'+id)?.value||'Cash';
+  db.payments[paymentKey(id,p)]={paid,status:paid>=due&&due>0?'paid':paid>0?'partial':'due',method,date:new Date().toISOString(),amount:due};
+  logActivity('Payment: '+w.name+' '+cur(paid));save();render();
+}
+function printReceipt(id){
+  const p=selectedPeriod(),w=db.workers.find(x=>x.id===id); if(!w)return;
+  const r=getPayment(id,p),due=periodCalc(w,p),out=Math.max(0,due-r.paid);
+  const win=window.open('','_blank'); if(!win){alert('Allow pop-ups.');return}
+  win.document.write(`<html><head><title>Receipt</title><style>body{font-family:Arial;padding:25px}.line{border-bottom:1px solid #ddd;padding:8px 0}.total{font-size:20px;font-weight:bold}</style></head><body><h2 style="text-align:center">GOROFA WORKER PAYMENT</h2><div class="line"><b>Worker:</b> ${esc(w.name)}</div><div class="line"><b>ID:</b> ${esc(w.id)}</div><div class="line"><b>Period:</b> ${esc(p.label)}</div><div class="line"><b>Due:</b> ${cur(due)}</div><div class="line"><b>Paid:</b> ${cur(r.paid)}</div><div class="line total">Outstanding: ${cur(out)}</div><p>Generated: ${new Date().toLocaleString()}</p><script>window.onload=()=>window.print()<\/script></body></html>`);
+  win.document.close();
+}
+
+function expenseTotal(e){return (+e.quantity||0)*(+e.unitAmount||+e.amount||0)}
+function addExpense(){
+  if(!adminOK())return;
+  const date=document.getElementById('expenseDate').value||iso(new Date());
+  const item=document.getElementById('expenseItem').value.trim();
+  const quantity=+(document.getElementById('expenseQuantity').value||1);
+  const unitAmount=+(document.getElementById('expenseUnitAmount').value||0);
+  const category=document.getElementById('expenseCategory').value.trim();
+  const description=document.getElementById('expenseDescription').value.trim();
+  if(!item){alert('Enter an expense item.');return}
+  if(quantity<=0||unitAmount<0){alert('Enter valid quantity and amount.');return}
+  db.expenses.push({id:Date.now(),date,item,quantity,unitAmount,category,description});
+  logActivity('Expense: '+item+' '+cur(expenseTotal({quantity,unitAmount})));
+  save();render();
+}
+function deleteExpense(id){
+  if(!adminOK())return;
+  if(!confirm('Delete this expense?'))return;
+  db.expenses=db.expenses.filter(e=>String(e.id)!==String(id));
+  save();render();
+}
+function materialTotal(m){return (+m.trips||0)*(+m.rate||0)}
+function addMaterial(){
+  if(!adminOK())return;
+  const date=document.getElementById('materialDate').value||iso(new Date());
+  const type=document.getElementById('materialType').value;
+  const trips=+(document.getElementById('materialTrips').value||0);
+  const rate=+(document.getElementById('materialRate').value||0);
+  if(trips<=0||rate<0){alert('Enter valid trips and rate.');return}
+  db.materials.push({id:Date.now(),date,type,trips,rate});
+  logActivity('Material: '+type+' '+trips+' trips');
+  save();render();
+}
+function deleteMaterial(id){
+  if(!adminOK())return;
+  if(!confirm('Delete this material?'))return;
+  db.materials=db.materials.filter(m=>String(m.id)!==String(id));
+  save();render();
+}
+function renderExpenses(){
+  const d=document.getElementById('expenseDate'); if(d&&!d.value)d.value=iso(new Date());
+  const list=document.getElementById('expenseList');
+  if(list){
+    const sorted=[...db.expenses].sort((a,b)=>(b.id||0)-(a.id||0));
+    list.innerHTML=sorted.map(e=>`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${esc(e.item||e.category||'Expense')}</b><div class="meta">${esc(e.date)} • Qty ${e.quantity||1} × ${cur(e.unitAmount||e.amount||0)}${e.description?' • '+esc(e.description):''}</div></div><div><b>${cur(expenseTotal(e))}</b> <button class="btn danger" onclick="deleteExpense('${e.id}')">×</button></div></div>`).join('')||'<div class="empty">No expenses recorded.</div>';
+  }
+  const cnt=document.getElementById('expenseCount');
+  if(cnt)cnt.textContent=db.expenses.length+' record'+(db.expenses.length===1?'':'s');
+}
+function renderMaterials(){
+  const d=document.getElementById('materialDate'); if(d&&!d.value)d.value=iso(new Date());
+  const list=document.getElementById('materialList');
+  if(list){
+    const sorted=[...db.materials].sort((a,b)=>(b.id||0)-(a.id||0));
+    list.innerHTML=sorted.map(m=>`<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div><b>${esc(m.type)}</b><div class="meta">${esc(m.date)} • ${m.trips} trip(s) × ${cur(m.rate)}</div></div><div><b>${cur(materialTotal(m))}</b> <button class="btn danger" onclick="deleteMaterial('${m.id}')">×</button></div></div>`).join('')||'<div class="empty">No materials recorded.</div>';
+  }
+  const cnt=document.getElementById('materialCount');
+  if(cnt)cnt.textContent=db.materials.length+' record'+(db.materials.length===1?'':'s');
+}
+function renderWeekCosts(){
+  const ex=db.expenses.filter(e=>inCurrentWeek(e.date));
+  const mat=db.materials.filter(m=>inCurrentWeek(m.date));
+  const et=ex.reduce((a,e)=>a+expenseTotal(e),0), mt=mat.reduce((a,m)=>a+materialTotal(m),0);
+  const etEl=document.getElementById('weekExpenseTotal'); if(etEl)etEl.textContent=cur(et);
+  const mtEl=document.getElementById('weekMaterialTotal'); if(mtEl)mtEl.textContent=cur(mt);
+  const exEl=document.getElementById('weekExpenses');
+  if(exEl)exEl.innerHTML=ex.map(e=>`<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>${esc(e.item||e.category||'Expense')}</b><div class="meta">${esc(e.date)} • Qty ${e.quantity||1} × ${cur(e.unitAmount||e.amount||0)}</div></div><b>${cur(expenseTotal(e))}</b></div>`).join('')||'<div class="empty">No expenses this week.</div>';
+  const mtEl2=document.getElementById('weekMaterials');
+  if(mtEl2)mtEl2.innerHTML=mat.map(m=>`<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>${esc(m.type)}</b><div class="meta">${esc(m.date)} • ${m.trips} trip(s) × ${cur(m.rate)}</div></div><b>${cur(materialTotal(m))}</b></div>`).join('')||'<div class="empty">No materials this week.</div>';
+}
+function weekRange(){const d=days();return [iso(d[0]),iso(d[6])]}
+function inCurrentWeek(date){const [a,b]=weekRange();return date>=a&&date<=b}
+
+function setAttendanceToday(){const d=document.getElementById('attendanceDate');if(d)d.value=iso(new Date());renderDateAttendance()}
+function renderDateAttendance(){
+  const d=document.getElementById('attendanceDate')?.value||iso(new Date());
+  const q=(document.getElementById('searchDateAtt')?.value||'').toLowerCase();
+  const time=document.getElementById('attendanceTime'); if(time&&!time.value)time.value=db.settings.attendanceDefaultTime||'08:00';
+  const label=document.getElementById('attendanceDateLabel'); if(label)label.textContent=new Date(d+'T00:00:00').toLocaleDateString('en',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  const list=db.workers.filter(w=>(w.name+' '+w.id+' '+w.category).toLowerCase().includes(q));
+  const el=document.getElementById('dateAttendanceList'); if(!el)return;
+  const marked=list.filter(w=>status(w.id,d)!=='off').length;
+  const sum=document.getElementById('attendanceMarkedSummary'); if(sum)sum.textContent=`${marked}/${list.length} marked`;
+  el.innerHTML=list.map(w=>{
+    const v=status(w.id,d),meta=db.attendanceMeta[key(w.id,d)]||{};
+    return `<div class="row" style="padding:10px 0;border-bottom:1px solid var(--line)"><div class="worker-head"><img class="worker-photo" src="${AVATAR}" alt=""><div><b>${esc(w.name)}</b><div class="meta">${esc(w.category)} • ${esc(w.id)}${meta.time?' • '+esc(meta.time):''}</div></div></div><div style="display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end"><button class="btn ${v==='full'?'primary':'secondary'}" onclick="markDateWorker('${esc(w.id)}','${d}','full')">FULL</button><button class="btn ${v==='half'?'primary':'secondary'}" onclick="markDateWorker('${esc(w.id)}','${d}','half')">HALF</button><button class="btn ${v==='off'?'danger':'secondary'}" onclick="markDateWorker('${esc(w.id)}','${d}','off')">OFF</button></div></div>`;
+  }).join('')||'<div class="empty">No workers found.</div>';
+}
+function markDateWorker(wid,date,value){
+  if(!isLoggedIn())return;
+  const time=document.getElementById('attendanceTime')?.value||db.settings.attendanceDefaultTime||'08:00';
+  db.attendance[key(wid,date)]=value;
+  db.attendanceMeta[key(wid,date)]={time,updatedAt:new Date().toISOString()};
+  logActivity('Attendance: '+wid+' '+date+' '+value);
+  save();renderDateAttendance();renderDashboard();
+}
+function markSelectedAttendance(){
+  if(!isLoggedIn())return;
+  const t=document.getElementById('attendanceTime')?.value;
+  if(!t){alert('Select a marking time first.');return}
+  db.settings.attendanceDefaultTime=t;save();renderDateAttendance();
+  alert('Time saved. Use FULL, HALF or OFF beside each worker.');
+}
+
+function renderDaily(){
+  const d=iso(new Date());
+  const tl=document.getElementById('todayLabel');
+  if(tl)tl.textContent=new Date().toLocaleDateString('en',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const locked=!!db.locks[d];
+  const tk=document.getElementById('todayLock');
+  if(tk)tk.innerHTML=locked?`<div class="locked">🔒 LOCKED. <button class="btn admin" onclick="adminUnlockDate('${d}')">Admin Unlock</button></div>`:`<div class="notice">🟢 Attendance is open.</div>`;
+  const total=db.workers.length, presentN=db.workers.filter(w=>status(w.id,d)!=='off').length;
+  const fullN=db.workers.filter(w=>status(w.id,d)==='full').length, halfN=db.workers.filter(w=>status(w.id,d)==='half').length;
+  const amt=db.workers.reduce((a,w)=>a+(status(w.id,d)==='full'?+w.fullRate:status(w.id,d)==='half'?+w.halfRate:0),0);
+  const ts=document.getElementById('todayStats');
+  if(ts)ts.innerHTML=`<div class="stat"><b>${total}</b><span>All workers</span></div><div class="stat"><b>${presentN}</b><span>Present</span></div><div class="stat"><b>${fullN}/${halfN}</b><span>Full/Half</span></div><div class="stat"><b>${cur(amt)}</b><span>Today's amount</span></div>`;
+  const ta=document.getElementById('todayAmount'); if(ta)ta.textContent=cur(amt);
+  const tl2=document.getElementById('todayList');
+  if(tl2)tl2.innerHTML=db.workers.map(w=>{
+    const v=status(w.id,d);
+    return `<div class="row" style="padding:9px 0;border-bottom:1px solid var(--line)"><div class="worker-head"><img class="worker-photo" src="${AVATAR}" alt=""><div><b>${esc(w.name)}</b><div class="meta">${esc(w.category)} • ${esc(w.id)}</div></div></div><div><span class="pill">${v==='full'?'FULL':v==='half'?'HALF':'OFF'}</span>${locked?`<button class="btn secondary no-print" onclick="adminEditAttendance('${esc(w.id)}','${d}')">Edit</button>`:''}</div></div>`;
+  }).join('');
+}
+
+function reportDates(){
+  const type=document.getElementById('reportPeriod')?.value||'week';
+  const raw=document.getElementById('reportDate')?.value||iso(new Date());
+  const dt=new Date(raw+'T00:00:00');
+  let start,end;
+  if(type==='month'){start=new Date(dt.getFullYear(),dt.getMonth(),1);end=new Date(dt.getFullYear(),dt.getMonth()+1,1)}
+  else if(type==='year'){start=new Date(dt.getFullYear(),0,1);end=new Date(dt.getFullYear()+1,0,1)}
+  else{start=monday(dt);end=new Date(start);end.setDate(end.getDate()+7)}
+  const out=[];for(let x=new Date(start);x<end;x.setDate(x.getDate()+1))out.push(new Date(x));
+  return out;
+}
+function renderReports(){
+  const st=document.getElementById('reportStats'),rt=document.getElementById('reportTable'),ea=document.getElementById('expenseArea');
+  if(!st||!rt||!ea)return;
+  const ds=reportDates(),from=iso(ds[0]),to=iso(ds[ds.length-1]);
+  const payroll=db.workers.reduce((a,w)=>a+periodCalc(w,{days:ds}),0);
+  const ex=db.expenses.filter(e=>e.date>=from&&e.date<=to).reduce((a,e)=>a+expenseTotal(e),0);
+  const mat=db.materials.filter(m=>m.date>=from&&m.date<=to).reduce((a,m)=>a+materialTotal(m),0);
+  const total=payroll+ex+mat;
+  st.innerHTML=`<div class="report-kpi"><b>${db.workers.length}</b><span>Workers</span></div><div class="report-kpi"><b>${cur(payroll)}</b><span>Payroll</span></div><div class="report-kpi"><b>${cur(ex)}</b><span>Expenses</span></div><div class="report-kpi"><b>${cur(mat)}</b><span>Materials</span></div>`;
+  rt.innerHTML='<div class="report-scroll"><table class="report-table"><thead><tr><th>Worker</th><th>Days</th><th>Amount</th></tr></thead><tbody>'+db.workers.map(w=>`<tr><td>${esc(w.name)}</td><td>${periodPresent(w,{days:ds})}</td><td>${cur(periodCalc(w,{days:ds}))}</td></tr>`).join('')+'</tbody></table></div>';
+  ea.innerHTML=`<div class="summary-grid"><div class="report-kpi"><b>${cur(ex)}</b><span>Expenses</span></div><div class="report-kpi"><b>${cur(mat)}</b><span>Materials</span></div><div class="report-kpi"><b>${cur(total)}</b><span>Total site cost</span></div></div>`;
+}
+function exportReportCSV(){
+  const ds=reportDates(),rows=[['Worker','Days','Payroll']];
+  db.workers.forEach(w=>rows.push([w.name,periodPresent(w,{days:ds}),periodCalc(w,{days:ds})]));
+  rows.push([],['Expenses',db.expenses.filter(e=>ds.some(d=>iso(d)===e.date)).reduce((a,e)=>a+expenseTotal(e),0)]);
+  rows.push(['Materials',db.materials.filter(m=>ds.some(d=>iso(d)===m.date)).reduce((a,m)=>a+materialTotal(m),0)]);
+  const csv=rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='gorofa-report.csv';a.click();
+}
+function downloadReportHTML(){
+  const ds=reportDates(),type=document.getElementById('reportPeriod')?.value||'week',date=document.getElementById('reportDate')?.value||iso(new Date());
+  const payroll=db.workers.reduce((a,w)=>a+periodCalc(w,{days:ds}),0);
+  const ex=db.expenses.filter(e=>e.date>=iso(ds[0])&&e.date<=iso(ds[ds.length-1])).reduce((a,e)=>a+expenseTotal(e),0);
+  const mat=db.materials.filter(m=>m.date>=iso(ds[0])&&m.date<=iso(ds[ds.length-1])).reduce((a,m)=>a+materialTotal(m),0);
+  const rows=db.workers.map(w=>`<tr><td>${esc(w.name)}</td><td>${periodPresent(w,{days:ds})}</td><td>${cur(periodCalc(w,{days:ds}))}</td></tr>`).join('');
+  const html=`<!doctype html><html><head><meta charset="utf-8"><title>Gorofa Report</title><style>body{font-family:Arial;padding:30px}h1{color:#0b5cab}table{width:100%;border-collapse:collapse;margin-top:20px}th,td{border:1px solid #ccc;padding:9px}th{background:#eef5ff}</style></head><body><h1>GOROFA WORKER PAYMENT REPORT</h1><p>Period: ${type} | Date: ${date}</p><div>Payroll: <b>${cur(payroll)}</b> • Expenses: <b>${cur(ex)}</b> • Materials: <b>${cur(mat)}</b> • Total: <b>${cur(payroll+ex+mat)}</b></div><table><thead><tr><th>Worker</th><th>Days</th><th>Payroll</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([html],{type:'text/html'}));a.download='gorofa-report-'+date+'.html';a.click();
+}
+function printSmartReport(){printWeekly()}
+function printWeekly(){
+  const d=days(),wk=week();
+  const total=db.workers.reduce((a,w)=>a+calc(w),0);
+  const rows=db.workers.map((w,i)=>{
+    const vals=d.map(x=>status(w.id,iso(x)));
+    const full=vals.filter(x=>x==='full').length,half=vals.filter(x=>x==='half').length;
+    const amt=calc(w),paid=db.payments[w.id+'|'+wk];
+    return `<tr><td>${i+1}</td><td>${esc(w.name)}</td>${vals.map(v=>`<td>${v==='full'?'F':v==='half'?'H':'-'}</td>`).join('')}<td>${full}</td><td>${half}</td><td>${present(w)}</td><td>${cur(amt)}</td><td>${paid?'PAID':'DUE'}</td><td></td></tr>`;
+  }).join('');
+  const pr=document.getElementById('printReport');
+  pr.innerHTML=`<h1>GOROFA WEEKLY WORKER ATTENDANCE & PAYMENT</h1><div class="print-meta">Week: <b>${d[0].toLocaleDateString()} – ${d[6].toLocaleDateString()}</b> | Total payroll: <b>${cur(total)}</b></div><table class="print-table"><thead><tr><th>#</th><th>Worker</th>${d.map(x=>`<th>${x.toLocaleDateString('en',{weekday:'short'}).slice(0,3)}<br>${x.getDate()}</th>`).join('')}<th>Full</th><th>Half</th><th>Days</th><th>Amount</th><th>Status</th><th>Signature</th></tr></thead><tbody>${rows}</tbody><tfoot><tr><th colspan="9">TOTAL</th><th>${cur(total)}</th><th></th><th></th></tr></tfoot></table><div class="sign"><div class="sig">Prepared by</div><div class="sig">Checked by</div><div class="sig">Manager</div></div>`;
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  pr.style.display='block';
+  window.print();
+  setTimeout(()=>{pr.style.display='none';show('payments')},500);
+}
+
+function adminOK(){return isLoggedIn()}
+function adminUnlockDate(date){if(!adminOK())return;delete db.locks[date];save();render()}
+function adminEditAttendance(wid,date){if(!adminOK())return;const k=key(wid,date),v=status(wid,date);db.attendance[k]=v==='off'?'full':v==='full'?'half':'off';save();render()}
+function setAdminPin(){if(!isLoggedIn())return;const pin=document.getElementById('adminPin').value.trim();if(!/^\d{4,8}$/.test(pin)){alert('Use a 4–8 digit PIN.');return}db.settings.adminPin=pin;save();alert('PIN saved.')}
+
+function saveSettings(){if(!adminOK())return;db.settings.currency=document.getElementById('currency').value||'KSh';db.settings.workDays=document.getElementById('workDays').value||'';save();render()}
+function saveAttendanceTime(){const t=document.getElementById('attendanceDefaultTime').value;if(t){db.settings.attendanceDefaultTime=t;save();const at=document.getElementById('attendanceTime');if(at)at.value=t;}}
+function renderSettings(){
+  renderActivity();
+  const c=document.getElementById('currency'); if(c)c.value=db.settings.currency||'KSh';
+  const wd=document.getElementById('workDays'); if(wd)wd.value=db.settings.workDays||'';
+  const at=document.getElementById('attendanceDefaultTime'); if(at)at.value=db.settings.attendanceDefaultTime||'08:00';
+  renderAdminMembers();
+}
+async function addAdminMember(){
+  if(!isLoggedIn())return;
+  const u=document.getElementById('newAdminUser').value.trim().toLowerCase();
+  const p=document.getElementById('newAdminPass').value;
+  if(!u){alert('Username required.');return}
+  if(!validUsername(u)){alert('Username must be 3–30 characters (letters, numbers, . _ -).');return}
+  if(p.length<8){alert('Password must be at least 8 characters.');return}
+  if((db.settings.adminMembers||[]).some(m=>m.username===u)){alert('That username already exists in the member list.');return}
+  const salt=randomBytes(16);
+  db.settings.adminMembers.push({username:u,salt:b64(salt),passwordHash:await hashPassword(p,salt),createdAt:new Date().toISOString()});
+  save();
+  document.getElementById('newAdminUser').value='';
+  document.getElementById('newAdminPass').value='';
+  renderAdminMembers();
+  alert('Admin member added. They can now sign in with this username and password.');
+}
+function removeAdminMember(i){if(!adminOK())return;db.settings.adminMembers.splice(i,1);save();renderAdminMembers()}
+function renderAdminMembers(){
+  const el=document.getElementById('adminMembersList'); if(!el)return;
+  const arr=db.settings.adminMembers||[];
+  el.innerHTML=arr.map((m,i)=>`<div class="row" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><b>${esc(m.username)}</b><div class="meta">Administrator</div></div><button class="btn danger" onclick="removeAdminMember(${i})">Remove</button></div>`).join('')||'<div class="empty">No additional admin members.</div>';
+}
+
+function logActivity(msg){db.activity=db.activity||[];db.activity.unshift({time:new Date().toISOString(),message:msg});db.activity=db.activity.slice(0,200)}
+function renderActivity(){
+  const el=document.getElementById('activityLog'); if(!el)return;
+  el.innerHTML=(db.activity||[]).slice(0,30).map(a=>`<div class="row" style="padding:7px 0;border-bottom:1px solid var(--line)"><span>${esc(a.message)}</span><span class="meta">${new Date(a.time).toLocaleString()}</span></div>`).join('')||'<div class="empty">No activity yet.</div>';
+}
+function exportData(){if(!adminOK())return;logActivity('Backup created');save();const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([JSON.stringify(db,null,2)],{type:'application/json'}));a.download='gorofa-backup.json';a.click()}
+function importData(ev){
+  if(!adminOK())return;
+  const f=ev.target.files?.[0]; if(!f)return;
+  const r=new FileReader();
+  r.onload=()=>{try{const incoming=JSON.parse(r.result);if(!incoming||!Array.isArray(incoming.workers))throw new Error('bad');if(!confirm('Restore? Current data will be replaced.'))return;db=incoming;db.settings=db.settings||{};db.activity=Array.isArray(db.activity)?db.activity:[];logActivity('Backup restored');save();render();alert('Backup restored.')}catch(e){alert('Invalid file.')}};
+  r.readAsText(f); ev.target.value='';
+}
+function resetAll(){if(confirm('Clear all attendance and payment history? Worker list remains.')){db.attendance={};db.payments={};save();render()}}
+
+function render(){
+  renderDashboard(); renderDaily(); renderAttendance(); renderDateAttendance();
+  renderWorkers(); renderPayments(); renderExpenses(); renderMaterials();
+  renderSettings(); renderReports();
+}
+function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))}
+
+const ws=document.getElementById('weekStart'); if(ws)ws.value=iso(monday(new Date()));
+const ad=document.getElementById('attendanceDate'); if(ad)ad.value=iso(new Date());
+render();
+initFirebaseCloud().then(()=>initAuth());
+</script>
+</body>
+</html>
